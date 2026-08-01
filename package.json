@@ -1,5 +1,5 @@
 {
-  "name": "kaying-filetree",
+  "name": "@kayingai/kaying-filetree",
   "version": "0.1.0",
   "description": "Framework-agnostic file tree + preview component (Web Component + Shadow DOM + Shiki)",
   "type": "module",

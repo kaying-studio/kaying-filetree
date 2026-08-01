@@ -1,7 +1,7 @@
 # kaying-filetree
 
 [![CI](https://github.com/kaying-studio/kaying-filetree/actions/workflows/ci.yml/badge.svg)](https://github.com/kaying-studio/kaying-filetree/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/kaying-filetree)](https://www.npmjs.com/package/kaying-filetree)
+[![npm](https://img.shields.io/npm/v/@kayingai/kaying-filetree)](https://www.npmjs.com/package/@kayingai/kaying-filetree)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 [English](README.md) · [简体中文](README.zh-CN.md)
@@ -29,11 +29,11 @@
 ## 安装
 
 ```bash
-npm install kaying-filetree
+npm install @kayingai/kaying-filetree
 # 或
-pnpm add kaying-filetree
+pnpm add @kayingai/kaying-filetree
 # 或
-yarn add kaying-filetree
+yarn add @kayingai/kaying-filetree
 ```
 
 ## 快速开始
@@ -42,7 +42,7 @@ yarn add kaying-filetree
 
 ```html
 <script type="module">
-  import 'kaying-filetree';
+  import '@kayingai/kaying-filetree';
 </script>
 
 <agent-file-explorer
@@ -82,7 +82,7 @@ yarn add kaying-filetree
 ### React
 
 ```tsx
-import 'kaying-filetree';
+import '@kayingai/kaying-filetree';
 import { useRef, useEffect } from 'react';
 
 function FileExplorer({ tree }) {

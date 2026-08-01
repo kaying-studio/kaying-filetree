@@ -1,11 +1,11 @@
 # Publishing Guide
 
-This guide explains how to automatically build and publish `kaying-filetree` to npm using GitHub Actions.
+This guide explains how to automatically build and publish `@kayingai/kaying-filetree` to npm using GitHub Actions.
 
 ## Prerequisites
 
 - An [npm](https://www.npmjs.com/) account.
-- The npm package name `kaying-filetree` is available (or owned by you).
+- The npm package name `@kayingai/kaying-filetree` is available (or owned by you).
 - Push access to the `https://github.com/kaying-studio/kaying-filetree.git` repository.
 
 ## One-time Setup
@@ -78,7 +78,7 @@ Once the release is published, the `Release` workflow will automatically:
 ### Step 4. Verify
 
 1. Check the **Actions** tab to confirm the workflow succeeded.
-2. Visit `https://www.npmjs.com/package/kaying-filetree` to confirm the new version is live.
+2. Visit `https://www.npmjs.com/package/@kayingai/kaying-filetree` to confirm the new version is live.
 
 ## Manual Publishing (Fallback)
 
