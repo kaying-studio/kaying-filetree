@@ -12,6 +12,29 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaying-studio/kaying-filetree.git"
+  },
+  "homepage": "https://github.com/kaying-studio/kaying-filetree#readme",
+  "bugs": {
+    "url": "https://github.com/kaying-studio/kaying-filetree/issues"
+  },
+  "keywords": [
+    "file-tree",
+    "file-explorer",
+    "code-preview",
+    "web-components",
+    "custom-elements",
+    "shadow-dom",
+    "shiki",
+    "syntax-highlighting",
+    "chatgpt-codex",
+    "typescript",
+    "lit"
+  ],
+  "author": "Kaying Studio",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -28,5 +51,12 @@
     "@tailwindcss/vite": "^4.0.0",
     "tailwindcss": "^4.0.0"
   },
-  "files": ["dist", "README.md"]
+  "files": [
+    "dist",
+    "docs",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE",
+    "PUBLISH.md"
+  ]
 }

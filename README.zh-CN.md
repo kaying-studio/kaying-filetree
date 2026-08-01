@@ -1,5 +1,9 @@
 # kaying-filetree
 
+[![CI](https://github.com/kaying-studio/kaying-filetree/actions/workflows/ci.yml/badge.svg)](https://github.com/kaying-studio/kaying-filetree/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/kaying-filetree)](https://www.npmjs.com/package/kaying-filetree)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 [English](README.md) · [简体中文](README.zh-CN.md)
 
 受 ChatGPT Codex 启发的框架无关文件树 + 代码预览 Web Component。
@@ -32,7 +36,7 @@ pnpm add kaying-filetree
 yarn add kaying-filetree
 ```
 
-## 使用
+## 快速开始
 
 ### 原生 HTML
 
@@ -58,18 +62,10 @@ yarn add kaying-filetree
     isDirectory: true,
     children: [
       {
-        id: 'src',
-        name: 'src',
-        path: '/project/src',
-        isDirectory: true,
-        children: [
-          {
-            id: 'src/index.ts',
-            name: 'index.ts',
-            path: '/project/src/index.ts',
-            isDirectory: false,
-          },
-        ],
+        id: 'src/index.ts',
+        name: 'index.ts',
+        path: '/project/src/index.ts',
+        isDirectory: false,
       },
     ],
   };
@@ -181,6 +177,26 @@ npm run typecheck
 # 构建
 npm run build
 ```
+
+## CI / CD
+
+本仓库使用 GitHub Actions 进行持续集成和自动化 npm 发布：
+
+- **CI**（`.github/workflows/ci.yml`）— 每次 push 和 pull request 时运行类型检查和构建。
+- **Release**（`.github/workflows/release.yml`）— 创建 GitHub Release 时自动发布到 npm。
+
+配置自动发布：
+
+1. 在 [npmjs.com](https://www.npmjs.com/) 创建一个具有 **Publish** 权限的访问令牌。
+2. 进入 GitHub 仓库 **Settings → Secrets and variables → Actions**。
+3. 添加名为 `NPM_TOKEN` 的仓库密钥，值为你的 npm token。
+4. 创建新的 GitHub Release（或推送类似 `v0.1.0` 的 git 标签），工作流会自动构建并发布到 npm。
+
+完整操作步骤见 [PUBLISH.md](PUBLISH.md)。
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！提交前请确保 `npm run typecheck` 和 `npm run build` 通过。
 
 ## 协议
 

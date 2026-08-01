@@ -1,5 +1,9 @@
 # kaying-filetree
 
+[![CI](https://github.com/kaying-studio/kaying-filetree/actions/workflows/ci.yml/badge.svg)](https://github.com/kaying-studio/kaying-filetree/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/kaying-filetree)](https://www.npmjs.com/package/kaying-filetree)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 [English](README.md) · [简体中文](README.zh-CN.md)
 
 A framework-agnostic file tree + code preview Web Component inspired by ChatGPT Codex.
@@ -32,7 +36,7 @@ pnpm add kaying-filetree
 yarn add kaying-filetree
 ```
 
-## Usage
+## Quick Start
 
 ### Vanilla HTML
 
@@ -58,18 +62,10 @@ yarn add kaying-filetree
     isDirectory: true,
     children: [
       {
-        id: 'src',
-        name: 'src',
-        path: '/project/src',
-        isDirectory: true,
-        children: [
-          {
-            id: 'src/index.ts',
-            name: 'index.ts',
-            path: '/project/src/index.ts',
-            isDirectory: false,
-          },
-        ],
+        id: 'src/index.ts',
+        name: 'index.ts',
+        path: '/project/src/index.ts',
+        isDirectory: false,
       },
     ],
   };
@@ -181,6 +177,26 @@ npm run typecheck
 # build
 npm run build
 ```
+
+## CI / CD
+
+This repository uses GitHub Actions for continuous integration and automated npm publishing:
+
+- **CI** (`.github/workflows/ci.yml`) — runs `typecheck` and `build` on every push and pull request.
+- **Release** (`.github/workflows/release.yml`) — publishes the package to npm when a new GitHub Release is created.
+
+To set up automated publishing:
+
+1. Create an npm access token with **Publish** permission at [npmjs.com](https://www.npmjs.com/).
+2. In your GitHub repository, go to **Settings → Secrets and variables → Actions**.
+3. Add a repository secret named `NPM_TOKEN` with your npm token.
+4. Create a new GitHub Release (or push a new git tag like `v0.1.0`). The workflow will automatically build and publish to npm.
+
+See [PUBLISH.md](PUBLISH.md) for the full step-by-step guide.
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request. Make sure `npm run typecheck` and `npm run build` pass before submitting.
 
 ## License
 
