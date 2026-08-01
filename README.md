@@ -6,25 +6,20 @@
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
-A framework-agnostic file tree + code preview Web Component inspired by ChatGPT Codex.
+A file tree + code preview Web Component built for **custom AI agent interfaces**, fully benchmarked against the right-side file preview panel in **ChatGPT Codex**.
 
-- **Repository:** `https://github.com/kaying-studio/kaying-filetree.git`
-- **License:** [MIT](LICENSE)
+Designed around the agent workflow: present a browsable project structure on one side and rich file previews on the other, so your agent can show, explain, and let users inspect code, configs, images, and more — directly inside the conversation.
 
 ![kaying-filetree screenshot](./docs/screenshot.png)
 
-## Features
+## Built for agents
 
-- **Web Component / Custom Element** — works with React, Vue, Angular, Svelte, or vanilla HTML.
-- **Shadow DOM + CSS variables** — isolated styles and easy theming.
-- **Draggable split panel** — preview on the left, file tree on the right by default.
-- **Virtual scrolling** — handles large directories smoothly.
-- **File type icons** — 50+ built-in icons for common languages and config files.
-- **Syntax highlighting** — powered by [Shiki](https://shiki.style/) with line numbers.
-- **Search & filter** — quickly find files in the tree.
-- **Keyboard navigation** — ArrowUp/Down/Left/Right, Enter.
-- **Context menu** — copy selection, add to agent, Google search, and extensible actions.
-- **Light / dark / system themes**.
+- **Codex-style side panel** — draggable split view with the file tree on the right and the preview on the left, just like ChatGPT Codex.
+- **Agent-native interactions** — copy selection, **add to agent**, Google search, plus an extensible context menu for custom agent actions.
+- **No framework lock-in** — standard Web Component with Shadow DOM; drops into React, Vue, Svelte, Angular, or vanilla HTML.
+- **Rich file preview** — syntax highlighting via [Shiki](https://shiki.style/), line numbers, breadcrumbs, image preview, and file metadata.
+- **Production-grade tree** — virtual scrolling, search/filter, keyboard navigation, 50+ file-type icons, and Git status indicators.
+- **Theme aware** — light, dark, or system mode via `--trees-*` CSS variables.
 
 ## Installation
 
@@ -177,22 +172,6 @@ npm run typecheck
 # build
 npm run build
 ```
-
-## CI / CD
-
-This repository uses GitHub Actions for continuous integration and automated npm publishing:
-
-- **CI** (`.github/workflows/ci.yml`) — runs `typecheck` and `build` on every push and pull request.
-- **Release** (`.github/workflows/release.yml`) — publishes the package to npm when a new GitHub Release is created.
-
-To set up automated publishing:
-
-1. Create an npm access token with **Publish** permission at [npmjs.com](https://www.npmjs.com/).
-2. In your GitHub repository, go to **Settings → Secrets and variables → Actions**.
-3. Add a repository secret named `NPM_TOKEN` with your npm token.
-4. Create a new GitHub Release (or push a new git tag like `v0.1.0`). The workflow will automatically build and publish to npm.
-
-See [PUBLISH.md](PUBLISH.md) for the full step-by-step guide.
 
 ## Contributing
 

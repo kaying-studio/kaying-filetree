@@ -6,25 +6,20 @@
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
-受 ChatGPT Codex 启发的框架无关文件树 + 代码预览 Web Component。
+面向**自定义 AI Agent 界面**的文件树 + 代码预览 Web Component，功能和设计全面对标 **ChatGPT Codex** 右侧的文件预览面板。
 
-- **仓库地址：** `https://github.com/kaying-studio/kaying-filetree.git`
-- **开源协议：** [MIT](LICENSE)
+围绕 Agent 工作流设计：一侧展示可浏览的项目结构，另一侧展示富文件预览，让 Agent 可以在对话中直接展示、解释并让用户检查代码、配置、图片等内容。
 
 ![kaying-filetree 截图](./docs/screenshot.png)
 
-## 特性
+## 为 Agent 场景打造
 
-- **Web Component / 自定义元素** — 可用于 React、Vue、Angular、Svelte 或原生 HTML。
-- **Shadow DOM + CSS 变量** — 样式隔离，主题切换方便。
-- **可拖拽分栏** — 默认左侧内容预览，右侧文件树。
-- **虚拟滚动** — 大型目录也能流畅渲染。
-- **文件类型图标** — 内置 50+ 种常见语言和配置文件图标。
-- **语法高亮** — 基于 [Shiki](https://shiki.style/)，支持行号。
-- **搜索过滤** — 快速定位文件树中的文件。
-- **键盘导航** — 支持方向键和回车键。
-- **右键菜单** — 复制、添加到 agent、Google 搜索，并支持扩展更多操作。
-- **浅色 / 深色 / 跟随系统主题**。
+- **Codex 风格侧栏** — 可拖拽分栏，左侧内容预览、右侧文件树，与 ChatGPT Codex 一致。
+- **Agent 原生交互** — 复制选中内容、**添加到 agent**、Google 搜索，并支持扩展更多自定义右键菜单操作。
+- **无框架绑定** — 标准 Web Component + Shadow DOM，可在 React、Vue、Svelte、Angular 或原生 HTML 中直接使用。
+- **丰富的文件预览** — 基于 [Shiki](https://shiki.style/) 的语法高亮、行号、面包屑、图片预览和文件元信息。
+- **生产级文件树** — 虚拟滚动、搜索过滤、键盘导航、50+ 文件类型图标、Git 状态指示。
+- **主题自适应** — 支持浅色、深色、跟随系统，通过 `--trees-*` CSS 变量自定义。
 
 ## 安装
 
@@ -177,22 +172,6 @@ npm run typecheck
 # 构建
 npm run build
 ```
-
-## CI / CD
-
-本仓库使用 GitHub Actions 进行持续集成和自动化 npm 发布：
-
-- **CI**（`.github/workflows/ci.yml`）— 每次 push 和 pull request 时运行类型检查和构建。
-- **Release**（`.github/workflows/release.yml`）— 创建 GitHub Release 时自动发布到 npm。
-
-配置自动发布：
-
-1. 在 [npmjs.com](https://www.npmjs.com/) 创建一个具有 **Publish** 权限的访问令牌。
-2. 进入 GitHub 仓库 **Settings → Secrets and variables → Actions**。
-3. 添加名为 `NPM_TOKEN` 的仓库密钥，值为你的 npm token。
-4. 创建新的 GitHub Release（或推送类似 `v0.1.0` 的 git 标签），工作流会自动构建并发布到 npm。
-
-完整操作步骤见 [PUBLISH.md](PUBLISH.md)。
 
 ## 贡献
 
