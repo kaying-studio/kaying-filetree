@@ -10,6 +10,8 @@ A file tree + code preview Web Component built for **custom AI agent interfaces*
 
 Designed around the agent workflow: present a browsable project structure on one side and rich file previews on the other, so your agent can show, explain, and let users inspect code, configs, images, and more — directly inside the conversation.
 
+**[Live Demo](https://kaying-studio.github.io/kaying-filetree/)**
+
 ![kaying-filetree screenshot](./docs/screenshot.png)
 
 ## Built for agents

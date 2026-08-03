@@ -10,6 +10,8 @@
 
 围绕 Agent 工作流设计：一侧展示可浏览的项目结构，另一侧展示富文件预览，让 Agent 可以在对话中直接展示、解释并让用户检查代码、配置、图片等内容。
 
+**[在线预览](https://kaying-studio.github.io/kaying-filetree/)**
+
 ![kaying-filetree 截图](./docs/screenshot.png)
 
 ## 为 Agent 场景打造
