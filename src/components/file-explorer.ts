@@ -15,6 +15,10 @@ import "./file-tree.js";
 import "./file-preview.js";
 import "./split-panel.js";
 
+export interface FileExplorerTreeReadyDetail {
+  tree: FileNode;
+}
+
 @customElement("agent-file-explorer")
 export class AgentFileExplorer extends LitElement {
   /** 文件树数据 */
@@ -45,6 +49,14 @@ export class AgentFileExplorer extends LitElement {
   @property({ attribute: false })
   extraContextMenuActions: ContextMenuAction[] = [];
 
+  /** 文件树完成渲染后的回调，适合 Agent 面板执行首次展开等初始化操作 */
+  @property({ attribute: false })
+  onTreeReady?: (detail: FileExplorerTreeReadyDetail) => void;
+
+  /** 是否在文件树首次就绪时自动展开目录并选中第一个文件 */
+  @property({ type: Boolean })
+  autoOpenFirstFile = false;
+
   /** 分栏比例 (0-1)，左侧为内容预览区 */
   @property({ type: Number })
   splitRatio = 0.5;
@@ -54,6 +66,7 @@ export class AgentFileExplorer extends LitElement {
 
   /** file-tree 元素引用 */
   private treeRef: Ref<AgentFileTree> = litRef();
+  private autoOpenedTree: FileNode | null = null;
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -64,6 +77,48 @@ export class AgentFileExplorer extends LitElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener("agent-file-select", this.onFileSelectEvent as EventListener);
+  }
+
+  updated(changedProps: Map<string, unknown>): void {
+    if (!changedProps.has("tree") && !changedProps.has("autoOpenFirstFile")) return;
+    if (!this.tree) {
+      this.autoOpenedTree = null;
+      return;
+    }
+
+    const tree = this.tree;
+    const fileTree = this.getFileTree();
+    if (!fileTree) return;
+
+    void this.notifyTreeReady(tree, fileTree);
+  }
+
+  private async notifyTreeReady(tree: FileNode, fileTree: AgentFileTree): Promise<void> {
+    await fileTree.updateComplete;
+    if (this.tree !== tree) return;
+
+    const detail = { tree };
+    try {
+      this.onTreeReady?.(detail);
+    } catch (error) {
+      console.error("[agent-file-explorer] onTreeReady callback failed:", error);
+    }
+    this.dispatchEvent(
+      new CustomEvent<FileExplorerTreeReadyDetail>("agent-file-tree-ready", {
+        detail,
+        bubbles: true,
+        composed: true,
+      }),
+    );
+
+    if (this.autoOpenFirstFile && this.autoOpenedTree !== tree) {
+      this.autoOpenedTree = tree;
+      await this.openFirstFile();
+    }
+  }
+
+  private getFileTree(): AgentFileTree | null {
+    return this.shadowRoot?.querySelector("agent-file-tree") as AgentFileTree | null;
   }
 
   private onFileSelectEvent = (e: CustomEvent<{ node: FileNode; path: string }>) => {
@@ -89,19 +144,22 @@ export class AgentFileExplorer extends LitElement {
 
   /** 展开 file-tree 的所有目录 */
   public expandAll() {
-    this.treeRef.value?.expandAll();
+    this.getFileTree()?.expandAll();
   }
 
   /** 折叠 file-tree 的所有目录 */
   public collapseAll() {
-    this.treeRef.value?.collapseAll();
+    this.getFileTree()?.collapseAll();
   }
 
   /** 展开文件树并打开第一个文件，适合 Agent 面板首次展示项目时使用 */
   public async openFirstFile(): Promise<void> {
     await this.updateComplete;
-    this.treeRef.value?.expandAll();
-    this.treeRef.value?.selectFirstFile();
+    const fileTree = this.getFileTree();
+    if (!fileTree) return;
+    await fileTree.updateComplete;
+    fileTree.expandAll();
+    fileTree.selectFirstFile();
   }
 
   static styles = css`

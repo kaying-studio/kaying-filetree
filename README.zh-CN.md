@@ -112,6 +112,7 @@ function FileExplorer({ tree }) {
 
 ```ts
 explorer.showBreadcrumb = false;
+explorer.autoOpenFirstFile = true;
 explorer.tree = projectTree;
 
 explorer.addEventListener('agent-file-open', async (event) => {
@@ -120,11 +121,13 @@ explorer.addEventListener('agent-file-open', async (event) => {
   explorer.setFileContent(node.name, content, null, path, content.length);
 });
 
-// 展开文件树，并触发第一个文件的 agent-file-open 事件。
-await explorer.openFirstFile();
+// 也可以在文件树完成渲染后自行执行初始化逻辑。
+explorer.addEventListener('agent-file-tree-ready', () => {
+  console.log('文件树已就绪');
+});
 ```
 
-`openFirstFile()` 适合项目刚被识别时调用：用户会立即看到有意义的文件内容，文件内容如何读取仍由宿主 Agent 应用控制。
+`autoOpenFirstFile = true` 适合项目刚被识别时使用：上游组件会等待文件树完成渲染，然后自动展开目录并触发第一个文件的 `agent-file-open` 事件。使用方不需要依赖渲染帧或访问 Shadow DOM。也可以手动调用 `openFirstFile()`。
 
 ## API
 
@@ -140,6 +143,11 @@ await explorer.openFirstFile();
 | `showGitStatus` | `boolean` | `true` | 是否显示 Git 状态圆点。 |
 | `showBreadcrumb` | `boolean` | `true` | 是否显示预览区顶部的路径面包屑。 |
 | `extraContextMenuActions` | `ContextMenuAction[]` | `[]` | 注入文件预览区的自定义右键菜单操作。 |
+| `autoOpenFirstFile` | `boolean` | `false` | 文件树就绪后自动展开目录并选中第一个文件。 |
+
+| 回调 | 类型 | 说明 |
+|------|------|------|
+| `onTreeReady` | `(detail: { tree: FileNode }) => void` | 文件树完成渲染后的回调。 |
 
 | 方法 | 说明 |
 |------|------|
@@ -151,6 +159,7 @@ await explorer.openFirstFile();
 | 事件 | detail | 说明 |
 |------|--------|------|
 | `agent-file-open` | `{ node: FileNode, path: string }` | 选中文件时触发。 |
+| `agent-file-tree-ready` | `{ tree: FileNode }` | 文件树完成渲染后触发。 |
 | `agent-add-to-context` | `{ text: string, filename: string }` | 右键菜单“添加到 agent”时触发。 |
 
 ### `<agent-file-tree>`

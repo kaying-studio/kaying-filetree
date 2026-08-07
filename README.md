@@ -113,6 +113,7 @@ the current location while the preview header only shows the selected filename:
 
 ```ts
 explorer.showBreadcrumb = false;
+explorer.autoOpenFirstFile = true;
 explorer.tree = projectTree;
 
 explorer.addEventListener('agent-file-open', async (event) => {
@@ -121,13 +122,16 @@ explorer.addEventListener('agent-file-open', async (event) => {
   explorer.setFileContent(node.name, content, null, path, content.length);
 });
 
-// Expands the tree and emits agent-file-open for the first file.
-await explorer.openFirstFile();
+// Or run initialization after the tree has finished rendering.
+explorer.addEventListener('agent-file-tree-ready', () => {
+  console.log('file tree is ready');
+});
 ```
 
-`openFirstFile()` is useful when a project is first detected: users immediately
-see meaningful content instead of an empty preview, while the host application
-still controls how file contents are loaded.
+Set `autoOpenFirstFile = true` when a project is first detected: the component
+waits for the file tree to finish rendering, expands directories, and emits
+`agent-file-open` for the first file. Consumers do not need to coordinate render
+frames or access Shadow DOM. `openFirstFile()` remains available for manual use.
 
 ## API
 
@@ -143,6 +147,11 @@ still controls how file contents are loaded.
 | `showGitStatus` | `boolean` | `true` | Show Git status dots. |
 | `showBreadcrumb` | `boolean` | `true` | Show the preview path breadcrumb. |
 | `extraContextMenuActions` | `ContextMenuAction[]` | `[]` | Custom actions for the preview context menu. |
+| `autoOpenFirstFile` | `boolean` | `false` | Expand the tree and select the first file after the tree is ready. |
+
+| Callback | Type | Description |
+|----------|------|-------------|
+| `onTreeReady` | `(detail: { tree: FileNode }) => void` | Called after the file tree finishes rendering. |
 
 | Method | Description |
 |--------|-------------|
@@ -154,6 +163,7 @@ still controls how file contents are loaded.
 | Event | Detail | Description |
 |-------|--------|-------------|
 | `agent-file-open` | `{ node: FileNode, path: string }` | Fired when a file is selected. |
+| `agent-file-tree-ready` | `{ tree: FileNode }` | Fired after the file tree finishes rendering. |
 | `agent-add-to-context` | `{ text: string, filename: string }` | Fired from the context menu "Add to agent". |
 
 ### `<agent-file-tree>`

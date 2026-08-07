@@ -33,6 +33,7 @@ The following workflows are already included in the repository:
 
 - `.github/workflows/ci.yml` — runs type checking and building on every push and pull request to `main`/`master`.
 - `.github/workflows/release.yml` — publishes to npm when a GitHub Release is published.
+- `npm run build:release` — runs type checking and generates the publishable build artifact.
 
 No extra configuration is required if you use the default `main` or `master` branch.
 
@@ -86,8 +87,7 @@ If you need to publish manually:
 
 ```bash
 npm login
-npm run typecheck
-npm run build
+npm run build:release
 npm publish --access public
 ```
 

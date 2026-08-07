@@ -37,6 +37,7 @@ export { AgentFilePreview } from "./components/file-preview.js";
 export type { ContextMenuAction } from "./components/file-preview.js";
 export { AgentSplitPanel } from "./components/split-panel.js";
 export { AgentFileExplorer } from "./components/file-explorer.js";
+export type { FileExplorerTreeReadyDetail } from "./components/file-explorer.js";
 
 // Types
 export type { FileNode, FlatNode, GitStatus } from "./utils/tree-model.js";
