@@ -325,6 +325,7 @@ export function getShikiLang(filename: string): string {
     ts: "typescript", cts: "typescript", mts: "typescript",
     jsx: "jsx", tsx: "tsx",
     py: "python", pyw: "python",
+    lua: "lua",
     rs: "rust",
     go: "go",
     swift: "swift",

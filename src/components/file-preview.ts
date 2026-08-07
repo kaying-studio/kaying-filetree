@@ -44,6 +44,10 @@ export class AgentFilePreview extends LitElement {
   @property({ attribute: false })
   filePath: string = "";
 
+  /** 是否显示文件路径面包屑 */
+  @property({ type: Boolean })
+  showBreadcrumb = true;
+
   /** 文件大小（字节） */
   @property({ attribute: false })
   fileSize: number | null = null;
@@ -66,6 +70,7 @@ export class AgentFilePreview extends LitElement {
   @state() private contextMenu: { x: number; y: number; selection: string } | null = null;
 
   private highlighter: Highlighter | null = null;
+  private highlighterPromise: Promise<void> | null = null;
   private currentTheme: "light" | "dark" = "dark";
 
   async connectedCallback(): Promise<void> {
@@ -100,16 +105,40 @@ export class AgentFilePreview extends LitElement {
       : this.theme;
   }
 
-  private async initHighlighter() {
-    if (this.highlighter) return;
+  private async initHighlighter(): Promise<void> {
+    const theme = this.shikiTheme;
+    if (this.highlighter?.getLoadedThemes().includes(theme)) return;
+
+    if (!this.highlighterPromise) {
+      this.highlighterPromise = this.loadHighlighterTheme(theme);
+    }
+    await this.highlighterPromise;
+    this.highlighterPromise = null;
+
+    // The theme can change while Shiki is loading. Ensure the latest theme is
+    // available before the caller tries to render with it.
+    if (this.shikiTheme !== theme && !this.highlighter?.getLoadedThemes().includes(this.shikiTheme)) {
+      await this.initHighlighter();
+    }
+  }
+
+  private async loadHighlighterTheme(theme: string): Promise<void> {
     try {
       this.loading = true;
-      this.highlighter = await createHighlighter({
-        themes: [this.shikiTheme],
-        langs: ["javascript", "typescript", "jsx", "tsx", "python", "rust",
-          "go", "json", "yaml", "bash", "html", "css", "scss", "markdown",
-          "sql", "xml", "diff", "dockerfile", "toml", "ini", "text"],
-      });
+      if (!this.highlighter) {
+        this.highlighter = await createHighlighter({
+          themes: [theme],
+          langs: [
+            "javascript", "typescript", "jsx", "tsx", "python", "rust", "lua",
+            "go", "json", "yaml", "bash", "html", "css", "scss", "markdown",
+            "sql", "xml", "diff", "dockerfile", "toml", "ini", "text",
+          ],
+        });
+      } else if (!this.highlighter.getLoadedThemes().includes(theme)) {
+        // Consumers may provide any registered Shiki theme name at runtime.
+        await this.highlighter.loadTheme(theme as never);
+      }
+      this.error = null;
     } catch (e) {
       console.error("[agent-file-preview] Failed to init Shiki:", e);
       this.error = "Failed to initialize syntax highlighter";
@@ -124,10 +153,8 @@ export class AgentFilePreview extends LitElement {
       return;
     }
 
-    // 等待 highlighter 初始化完成
-    if (!this.highlighter) {
-      await this.initHighlighter();
-    }
+    // 等待 highlighter 初始化完成，并确保当前主题已经加载
+    await this.initHighlighter();
 
     // 如果仍然没有 highlighter，回退到纯文本
     if (!this.highlighter) {
@@ -255,7 +282,7 @@ export class AgentFilePreview extends LitElement {
   }
 
   private renderBreadcrumb(): unknown {
-    if (!this.filePath) return nothing;
+    if (!this.showBreadcrumb || !this.filePath) return nothing;
     const parts = this.filePath.split(/[/\\]+/).filter(Boolean);
     return html`
       <div class="preview-breadcrumb">

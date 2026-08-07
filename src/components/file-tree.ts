@@ -461,6 +461,13 @@ export class AgentFileTree extends LitElement {
     this.expandedIds = new Set();
   }
 
+  /** 选中树中按当前顺序排列的第一个文件 */
+  public selectFirstFile() {
+    const firstFile = findFirstFile(this.tree);
+    if (!firstFile) return;
+    this.selectNode(firstFile);
+  }
+
   // === Styles ===
 
   static styles = [
@@ -768,6 +775,16 @@ export class AgentFileTree extends LitElement {
       </div>
     `;
   }
+}
+
+function findFirstFile(node: FileNode | null): FileNode | null {
+  if (!node) return null;
+  if (!node.isDirectory) return node;
+  for (const child of node.children ?? []) {
+    const file = findFirstFile(child);
+    if (file) return file;
+  }
+  return null;
 }
 
 declare global {

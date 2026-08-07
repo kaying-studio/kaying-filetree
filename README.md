@@ -106,6 +106,29 @@ function FileExplorer({ tree }) {
 }
 ```
 
+### Custom agent panel
+
+For an agent-facing panel, the project tree can remain the source of truth for
+the current location while the preview header only shows the selected filename:
+
+```ts
+explorer.showBreadcrumb = false;
+explorer.tree = projectTree;
+
+explorer.addEventListener('agent-file-open', async (event) => {
+  const { node, path } = event.detail;
+  const content = await loadFileFromAgentBackend(path);
+  explorer.setFileContent(node.name, content, null, path, content.length);
+});
+
+// Expands the tree and emits agent-file-open for the first file.
+await explorer.openFirstFile();
+```
+
+`openFirstFile()` is useful when a project is first detected: users immediately
+see meaningful content instead of an empty preview, while the host application
+still controls how file contents are loaded.
+
 ## API
 
 ### `<agent-file-explorer>`
@@ -118,12 +141,15 @@ function FileExplorer({ tree }) {
 | `splitRatio` | `number` | `0.5` | Initial ratio of the left (preview) panel. |
 | `virtualized` | `boolean` | `true` | Enable virtual scrolling. |
 | `showGitStatus` | `boolean` | `true` | Show Git status dots. |
+| `showBreadcrumb` | `boolean` | `true` | Show the preview path breadcrumb. |
+| `extraContextMenuActions` | `ContextMenuAction[]` | `[]` | Custom actions for the preview context menu. |
 
 | Method | Description |
 |--------|-------------|
 | `setFileContent(filename, content, imageUrl?, path?, size?)` | Display a file in the preview panel. |
 | `expandAll()` | Expand all directories. |
 | `collapseAll()` | Collapse all directories. |
+| `openFirstFile()` | Expand the tree and request the first file to open. |
 
 | Event | Detail | Description |
 |-------|--------|-------------|
@@ -144,6 +170,7 @@ Can be used standalone for just the code preview.
 | `content` | `string` | File text content. |
 | `imageUrl` | `string \| null` | URL for image preview. |
 | `filePath` | `string` | Full path for breadcrumb. |
+| `showBreadcrumb` | `boolean` | Whether to show the path breadcrumb. |
 | `fileSize` | `number \| null` | File size in bytes. |
 | `extraContextMenuActions` | `ContextMenuAction[]` | Custom context-menu actions. |
 

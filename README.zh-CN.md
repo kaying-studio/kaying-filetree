@@ -106,6 +106,26 @@ function FileExplorer({ tree }) {
 }
 ```
 
+### 自定义 Agent 文件面板
+
+在 Agent 场景中，可以让右侧文件树负责展示当前位置，左侧预览区只显示当前文件名：
+
+```ts
+explorer.showBreadcrumb = false;
+explorer.tree = projectTree;
+
+explorer.addEventListener('agent-file-open', async (event) => {
+  const { node, path } = event.detail;
+  const content = await loadFileFromAgentBackend(path);
+  explorer.setFileContent(node.name, content, null, path, content.length);
+});
+
+// 展开文件树，并触发第一个文件的 agent-file-open 事件。
+await explorer.openFirstFile();
+```
+
+`openFirstFile()` 适合项目刚被识别时调用：用户会立即看到有意义的文件内容，文件内容如何读取仍由宿主 Agent 应用控制。
+
 ## API
 
 ### `<agent-file-explorer>`
@@ -118,12 +138,15 @@ function FileExplorer({ tree }) {
 | `splitRatio` | `number` | `0.5` | 左侧预览区初始占比。 |
 | `virtualized` | `boolean` | `true` | 是否启用虚拟滚动。 |
 | `showGitStatus` | `boolean` | `true` | 是否显示 Git 状态圆点。 |
+| `showBreadcrumb` | `boolean` | `true` | 是否显示预览区顶部的路径面包屑。 |
+| `extraContextMenuActions` | `ContextMenuAction[]` | `[]` | 注入文件预览区的自定义右键菜单操作。 |
 
 | 方法 | 说明 |
 |------|------|
 | `setFileContent(filename, content, imageUrl?, path?, size?)` | 在预览区显示文件内容。 |
 | `expandAll()` | 展开所有目录。 |
 | `collapseAll()` | 折叠所有目录。 |
+| `openFirstFile()` | 展开文件树并请求打开第一个文件。 |
 
 | 事件 | detail | 说明 |
 |------|--------|------|
@@ -144,6 +167,7 @@ function FileExplorer({ tree }) {
 | `content` | `string` | 文件文本内容。 |
 | `imageUrl` | `string \| null` | 图片预览 URL。 |
 | `filePath` | `string` | 完整路径，用于面包屑。 |
+| `showBreadcrumb` | `boolean` | 是否显示路径面包屑。 |
 | `fileSize` | `number \| null` | 文件大小（字节）。 |
 | `extraContextMenuActions` | `ContextMenuAction[]` | 自定义右键菜单操作。 |
 

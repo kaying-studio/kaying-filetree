@@ -9,6 +9,7 @@ import { LitElement, html, css } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ref as litRef, type Ref } from "lit/directives/ref.js";
 import type { FileNode } from "../utils/tree-model.js";
+import type { ContextMenuAction } from "./file-preview.js";
 import type { AgentFileTree } from "./file-tree.js";
 import "./file-tree.js";
 import "./file-preview.js";
@@ -35,6 +36,14 @@ export class AgentFileExplorer extends LitElement {
   /** 是否显示 Git 状态 */
   @property({ type: Boolean })
   showGitStatus = true;
+
+  /** 是否显示文件预览区顶部的路径面包屑 */
+  @property({ type: Boolean })
+  showBreadcrumb = true;
+
+  /** 传递给文件预览区的自定义右键菜单操作 */
+  @property({ attribute: false })
+  extraContextMenuActions: ContextMenuAction[] = [];
 
   /** 分栏比例 (0-1)，左侧为内容预览区 */
   @property({ type: Number })
@@ -88,6 +97,13 @@ export class AgentFileExplorer extends LitElement {
     this.treeRef.value?.collapseAll();
   }
 
+  /** 展开文件树并打开第一个文件，适合 Agent 面板首次展示项目时使用 */
+  public async openFirstFile(): Promise<void> {
+    await this.updateComplete;
+    this.treeRef.value?.expandAll();
+    this.treeRef.value?.selectFirstFile();
+  }
+
   static styles = css`
     :host {
       display: flex;
@@ -127,6 +143,8 @@ export class AgentFileExplorer extends LitElement {
             .fileSize=${this.selectedFile?.size ?? null}
             .theme=${this.theme}
             .shikiTheme=${this.shikiTheme}
+            .showBreadcrumb=${this.showBreadcrumb}
+            .extraContextMenuActions=${this.extraContextMenuActions}
           ></agent-file-preview>
           <agent-file-tree
             slot="second"
