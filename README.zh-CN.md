@@ -20,6 +20,7 @@
 - **Agent 原生交互** — 复制选中内容、**添加到 agent**、Google 搜索，并支持扩展更多自定义右键菜单操作。
 - **无框架绑定** — 标准 Web Component + Shadow DOM，可在 React、Vue、Svelte、Angular 或原生 HTML 中直接使用。
 - **丰富的文件预览** — 基于 [Shiki](https://shiki.style/) 的语法高亮、行号、面包屑、图片预览和文件元信息。
+- **Markdown 渲染预览** — Markdown 文件默认渲染为带样式的预览（标题、表格、引用、代码块高亮），并支持一键在“预览 / 源码”间切换。
 - **生产级文件树** — 虚拟滚动、搜索过滤、键盘导航、50+ 文件类型图标、Git 状态指示。
 - **主题自适应** — 支持浅色、深色、跟随系统，通过 `--trees-*` CSS 变量自定义。
 
@@ -129,6 +130,15 @@ explorer.addEventListener('agent-file-tree-ready', () => {
 
 `autoOpenFirstFile = true` 适合项目刚被识别时使用：上游组件会等待文件树完成渲染，然后自动展开目录并触发第一个文件的 `agent-file-open` 事件。使用方不需要依赖渲染帧或访问 Shadow DOM。也可以手动调用 `openFirstFile()`。
 
+组件挂载时希望**打开指定文件**（例如恢复上次会话、深链到某个路径），可配合 `tree` 一起设置 `initialFilePath`：
+
+```ts
+explorer.tree = projectTree;
+explorer.initialFilePath = '/project/README.md'; // 自动选中 README.md
+```
+
+组件会自动展开所有父目录、滚动到该文件可见位置，并触发其 `agent-file-open` 事件，无需任何手动协调。之后任意时刻都可以调用 `explorer.openFile(path)` 跳转到其他文件。
+
 ## API
 
 ### `<agent-file-explorer>`
@@ -144,6 +154,7 @@ explorer.addEventListener('agent-file-tree-ready', () => {
 | `showBreadcrumb` | `boolean` | `true` | 是否显示预览区顶部的路径面包屑。 |
 | `extraContextMenuActions` | `ContextMenuAction[]` | `[]` | 注入文件预览区的自定义右键菜单操作。 |
 | `autoOpenFirstFile` | `boolean` | `false` | 文件树就绪后自动展开目录并选中第一个文件。 |
+| `initialFilePath` | `string \| null` | `null` | 打开时指定要选中的文件路径（或节点 ID）。自动展开其祖先目录并触发 `agent-file-open`。 |
 
 | 回调 | 类型 | 说明 |
 |------|------|------|
@@ -155,6 +166,7 @@ explorer.addEventListener('agent-file-tree-ready', () => {
 | `expandAll()` | 展开所有目录。 |
 | `collapseAll()` | 折叠所有目录。 |
 | `openFirstFile()` | 展开文件树并请求打开第一个文件。 |
+| `openFile(path)` | 按路径（或节点 ID）选中文件：自动展开祖先目录并触发 `agent-file-open`。 |
 
 | 事件 | detail | 说明 |
 |------|--------|------|
@@ -179,6 +191,8 @@ explorer.addEventListener('agent-file-tree-ready', () => {
 | `showBreadcrumb` | `boolean` | 是否显示路径面包屑。 |
 | `fileSize` | `number \| null` | 文件大小（字节）。 |
 | `extraContextMenuActions` | `ContextMenuAction[]` | 自定义右键菜单操作。 |
+
+Markdown 文件默认以渲染视图预览，可在预览区顶部的“预览 / 源码”切换按钮间切换渲染结果与原始源码。
 
 ## 主题
 

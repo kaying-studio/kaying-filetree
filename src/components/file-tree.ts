@@ -25,6 +25,8 @@ import {
   flattenTree,
   filterTree,
   collectDirectoryIds,
+  findNodeByPath,
+  getAncestorIds,
 } from "../utils/tree-model.js";
 import { getFileIconName } from "../utils/file-types.js";
 import { getFileIconSvg, getUiIconSvg, fileIconColors, type FileIconName } from "../icons/file-icons.js";
@@ -466,6 +468,42 @@ export class AgentFileTree extends LitElement {
     const firstFile = findFirstFile(this.tree);
     if (!firstFile) return;
     this.selectNode(firstFile);
+  }
+
+  /**
+   * 按路径（或 ID）选中指定文件：自动展开其所有祖先目录，并在虚拟滚动中滚动到可见位置。
+   * 返回是否找到并选中了目标文件。
+   */
+  public async selectFileByPath(path: string): Promise<boolean> {
+    if (!this.tree) return false;
+    const target = findNodeByPath(this.tree, path);
+    if (!target || target.isDirectory) return false;
+
+    // 展开目标的所有祖先目录
+    const ancestorIds = getAncestorIds(this.tree, target.id);
+    if (ancestorIds.length > 0) {
+      const newExpanded = new Set(this.expandedIds);
+      for (const id of ancestorIds) newExpanded.add(id);
+      this.expandedIds = newExpanded;
+      await this.updateComplete;
+    }
+
+    const flat = this.flatNodes.find((f) => f.node.id === target.id);
+    if (!flat) return false;
+
+    this.selectNode(flat.node);
+    this.focusedIndex = flat.index;
+    this.scrollToIndex(flat.index);
+    return true;
+  }
+
+  private scrollToIndex(index: number): void {
+    if (this.virtualized) {
+      this.virtualManager?.scrollToIndex(index);
+      return;
+    }
+    const row = this.shadowRoot?.querySelector<HTMLElement>("[data-selected]");
+    row?.scrollIntoView({ block: "center" });
   }
 
   // === Styles ===

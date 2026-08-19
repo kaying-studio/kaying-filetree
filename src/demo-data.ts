@@ -384,7 +384,9 @@ export function clamp(value: number, min: number, max: number): number {
 `,
   "README.md": `# My Project
 
-A sample project demonstrating the agent-file-tree component.
+A sample project demonstrating the **agent-file-tree** component.
+
+> Web Component 文件树 + 代码预览组件，支持 Markdown 渲染预览。
 
 ## Getting Started
 
@@ -399,6 +401,23 @@ npm run dev
 - TypeScript
 - Vite
 - Tailwind CSS
+
+## Quick Example
+
+\`\`\`ts
+import { AgentFileExplorer } from '@kayingai/kaying-filetree';
+
+const explorer = new AgentFileExplorer();
+explorer.tree = projectTree;
+explorer.initialFilePath = '/README.md';
+\`\`\`
+
+## Table
+
+| Name    | Role     |
+| ------- | -------- |
+| Alice   | admin    |
+| Bob     | user     |
 
 ## License
 

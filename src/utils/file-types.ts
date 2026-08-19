@@ -311,6 +311,12 @@ export function getFileIconName(filename: string): FileIconName {
   return "default";
 }
 
+/** 判断是否为 Markdown 文件 */
+export function isMarkdownFile(filename: string): boolean {
+  const lower = filename.toLowerCase();
+  return /\.(md|markdown|mdown|mdwn|mdtext|mdtxt|mkd|mkdn|mdoc|markdn)$/.test(lower);
+}
+
 /** 判断是否为常见图片格式 */
 export function isImageFile(filename: string): boolean {
   const ext = filename.slice(filename.lastIndexOf(".") + 1).toLowerCase();

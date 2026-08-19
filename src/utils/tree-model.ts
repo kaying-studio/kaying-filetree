@@ -124,6 +124,43 @@ export function collectDirectoryIds(node: FileNode): string[] {
   return ids;
 }
 
+/** 按路径或 ID 查找节点（深度优先） */
+export function findNodeByPath(root: FileNode, path: string): FileNode | null {
+  if (root.path === path || root.id === path) return root;
+  for (const child of root.children ?? []) {
+    const found = findNodeByPath(child, path);
+    if (found) return found;
+  }
+  return null;
+}
+
+/** 收集目标节点的所有祖先目录 ID（用于自动展开） */
+export function getAncestorIds(root: FileNode, targetId: string): string[] {
+  const result: string[] = [];
+  let found = false;
+
+  function walk(node: FileNode): void {
+    if (found) return;
+    for (const child of node.children ?? []) {
+      if (child.id === targetId) {
+        result.push(node.id);
+        found = true;
+        return;
+      }
+      if (child.isDirectory) {
+        walk(child);
+        if (found) {
+          result.push(node.id);
+          return;
+        }
+      }
+    }
+  }
+
+  walk(root);
+  return result;
+}
+
 /** 获取节点的相对路径显示名（去除公共前缀） */
 export function getDisplayName(node: FileNode, rootPath?: string): string {
   if (!rootPath) return node.name;

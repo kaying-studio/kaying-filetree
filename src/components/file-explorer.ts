@@ -57,6 +57,10 @@ export class AgentFileExplorer extends LitElement {
   @property({ type: Boolean })
   autoOpenFirstFile = false;
 
+  /** 打开时指定要选中的文件路径（或节点 ID），会自动展开其祖先目录并触发 agent-file-open */
+  @property()
+  initialFilePath: string | null = null;
+
   /** 分栏比例 (0-1)，左侧为内容预览区 */
   @property({ type: Number })
   splitRatio = 0.5;
@@ -80,6 +84,14 @@ export class AgentFileExplorer extends LitElement {
   }
 
   updated(changedProps: Map<string, unknown>): void {
+    // 已挂载后单独变更 initialFilePath 时，直接重新定位目标文件
+    if (changedProps.has("initialFilePath") && this.initialFilePath && this.tree) {
+      const fileTree = this.getFileTree();
+      if (fileTree) {
+        void fileTree.selectFileByPath(this.initialFilePath);
+      }
+    }
+
     if (!changedProps.has("tree") && !changedProps.has("autoOpenFirstFile")) return;
     if (!this.tree) {
       this.autoOpenedTree = null;
@@ -111,8 +123,17 @@ export class AgentFileExplorer extends LitElement {
       }),
     );
 
-    if (this.autoOpenFirstFile && this.autoOpenedTree !== tree) {
-      this.autoOpenedTree = tree;
+    if (this.autoOpenedTree === tree) return;
+    this.autoOpenedTree = tree;
+
+    if (this.initialFilePath) {
+      const found = await fileTree.selectFileByPath(this.initialFilePath);
+      if (!found && this.autoOpenFirstFile) {
+        await this.openFirstFile();
+      }
+      return;
+    }
+    if (this.autoOpenFirstFile) {
       await this.openFirstFile();
     }
   }
@@ -160,6 +181,14 @@ export class AgentFileExplorer extends LitElement {
     await fileTree.updateComplete;
     fileTree.expandAll();
     fileTree.selectFirstFile();
+  }
+
+  /** 按路径（或节点 ID）打开指定文件：自动展开祖先目录、选中并触发 agent-file-open */
+  public async openFile(path: string): Promise<boolean> {
+    await this.updateComplete;
+    const fileTree = this.getFileTree();
+    if (!fileTree) return false;
+    return fileTree.selectFileByPath(path);
   }
 
   static styles = css`

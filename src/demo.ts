@@ -19,6 +19,8 @@ explorer.shikiTheme = "github-dark";
 explorer.virtualized = true;
 explorer.showGitStatus = true;
 explorer.splitRatio = 0.5;
+// 打开时指定选中的文件：自动展开祖先目录并触发 agent-file-open
+explorer.initialFilePath = "/project/README.md";
 
 // 监听文件打开事件
 explorer.addEventListener("agent-file-open", (e) => {

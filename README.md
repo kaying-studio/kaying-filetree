@@ -20,6 +20,7 @@ Designed around the agent workflow: present a browsable project structure on one
 - **Agent-native interactions** — copy selection, **add to agent**, Google search, plus an extensible context menu for custom agent actions.
 - **No framework lock-in** — standard Web Component with Shadow DOM; drops into React, Vue, Svelte, Angular, or vanilla HTML.
 - **Rich file preview** — syntax highlighting via [Shiki](https://shiki.style/), line numbers, breadcrumbs, image preview, and file metadata.
+- **Rendered markdown** — Markdown files are rendered to a styled preview (headings, tables, blockquotes, code blocks highlighted with Shiki) with a one-click **Preview / Source** toggle.
 - **Production-grade tree** — virtual scrolling, search/filter, keyboard navigation, 50+ file-type icons, and Git status indicators.
 - **Theme aware** — light, dark, or system mode via `--trees-*` CSS variables.
 
@@ -133,6 +134,18 @@ waits for the file tree to finish rendering, expands directories, and emits
 `agent-file-open` for the first file. Consumers do not need to coordinate render
 frames or access Shadow DOM. `openFirstFile()` remains available for manual use.
 
+To open a **specific file** when the component mounts (e.g. resume a previous
+session, or deep-link to a path), set `initialFilePath` together with `tree`:
+
+```ts
+explorer.tree = projectTree;
+explorer.initialFilePath = '/project/README.md'; // auto-selects README.md
+```
+
+The component expands every parent directory, scrolls the file into view, and
+emits `agent-file-open` for it — no manual coordination required. Use
+`explorer.openFile(path)` to jump to another file at any time.
+
 ## API
 
 ### `<agent-file-explorer>`
@@ -148,6 +161,7 @@ frames or access Shadow DOM. `openFirstFile()` remains available for manual use.
 | `showBreadcrumb` | `boolean` | `true` | Show the preview path breadcrumb. |
 | `extraContextMenuActions` | `ContextMenuAction[]` | `[]` | Custom actions for the preview context menu. |
 | `autoOpenFirstFile` | `boolean` | `false` | Expand the tree and select the first file after the tree is ready. |
+| `initialFilePath` | `string \| null` | `null` | Path (or node ID) to preselect when the tree is ready. Auto-expands parent directories and fires `agent-file-open`. |
 
 | Callback | Type | Description |
 |----------|------|-------------|
@@ -159,6 +173,7 @@ frames or access Shadow DOM. `openFirstFile()` remains available for manual use.
 | `expandAll()` | Expand all directories. |
 | `collapseAll()` | Collapse all directories. |
 | `openFirstFile()` | Expand the tree and request the first file to open. |
+| `openFile(path)` | Select the file at `path` (or node ID): expands its ancestors and fires `agent-file-open`. |
 
 | Event | Detail | Description |
 |-------|--------|-------------|
@@ -183,6 +198,10 @@ Can be used standalone for just the code preview.
 | `showBreadcrumb` | `boolean` | Whether to show the path breadcrumb. |
 | `fileSize` | `number \| null` | File size in bytes. |
 | `extraContextMenuActions` | `ContextMenuAction[]` | Custom context-menu actions. |
+
+By default Markdown files render in the preview panel. Use the **预览/源码**
+toggle in the header to switch between the rendered view and the raw
+syntax-highlighted source.
 
 ## Themes
 

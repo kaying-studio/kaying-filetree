@@ -49,9 +49,11 @@ export {
   flattenTree,
   filterTree,
   collectDirectoryIds,
+  findNodeByPath,
+  getAncestorIds,
   getDisplayName,
 } from "./utils/tree-model.js";
-export { getFileIconName, getShikiLang, isImageFile } from "./utils/file-types.js";
+export { getFileIconName, getShikiLang, isImageFile, isMarkdownFile } from "./utils/file-types.js";
 export { getFileIconSvg, getUiIconSvg } from "./icons/file-icons.js";
 export { computeVirtualRange, VirtualListManager } from "./utils/virtual-list.js";
 export type { VirtualRange } from "./utils/virtual-list.js";
