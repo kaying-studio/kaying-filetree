@@ -101,6 +101,7 @@ export class AgentFilePreview extends LitElement {
 
   private highlighter: Highlighter | null = null;
   private highlighterPromise: Promise<void> | null = null;
+  private renderFileContentScheduled = false;
   private currentTheme: "light" | "dark" = "dark";
 
   private get isMarkdown(): boolean {
@@ -127,12 +128,21 @@ export class AgentFilePreview extends LitElement {
       changedProps.has("markdownView") ||
       changedProps.has("previewMode")
     ) {
-      this.renderFileContent();
+      this.scheduleRenderFileContent();
     }
     if (changedProps.has("theme")) {
       this.updateTheme();
-      this.renderFileContent();
+      this.scheduleRenderFileContent();
     }
+  }
+
+  private scheduleRenderFileContent(): void {
+    if (this.renderFileContentScheduled) return;
+    this.renderFileContentScheduled = true;
+    queueMicrotask(() => {
+      this.renderFileContentScheduled = false;
+      if (this.isConnected) this.renderFileContent();
+    });
   }
 
   private renderFileContent(): void {
