@@ -243,6 +243,7 @@ export class AgentFileExplorer extends LitElement {
             .fileSize=${this.selectedFile?.size ?? null}
             .previewMode=${this.selectedFile?.mode ?? "content"}
             .previewUrl=${this.selectedFile?.previewUrl ?? null}
+            .previewMessage=${this.selectedFile?.previewMessage ?? ""}
             .unsupportedMessage=${this.selectedFile?.unsupportedMessage ?? "此文件类型暂不支持预览。"}
             .theme=${this.theme}
             .shikiTheme=${this.shikiTheme}
