@@ -9,7 +9,7 @@ import { LitElement, html, css } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ref as litRef, type Ref } from "lit/directives/ref.js";
 import type { FileNode } from "../utils/tree-model.js";
-import type { ContextMenuAction } from "./file-preview.js";
+import type { ContextMenuAction, FilePreviewSource } from "./file-preview.js";
 import type { AgentFileTree } from "./file-tree.js";
 import "./file-tree.js";
 import "./file-preview.js";
@@ -65,8 +65,8 @@ export class AgentFileExplorer extends LitElement {
   @property({ type: Number })
   splitRatio = 0.5;
 
-  /** 当前选中的文件内容 */
-  @state() private selectedFile: { name: string; content: string; imageUrl: string | null; path: string; size: number | null } | null = null;
+  /** 当前选中的文件预览源 */
+  @state() private selectedFile: (FilePreviewSource & { name: string; path: string; size: number | null }) | null = null;
 
   /** file-tree 元素引用 */
   private treeRef: Ref<AgentFileTree> = litRef();
@@ -160,7 +160,20 @@ export class AgentFileExplorer extends LitElement {
    * 设置当前预览的文件内容
    */
   public setFileContent(filename: string, content: string, imageUrl: string | null = null, path: string = "", size: number | null = null) {
-    this.selectedFile = { name: filename, content, imageUrl, path, size };
+    this.setPreviewSource({ mode: "content", filename, content, imageUrl, filePath: path, fileSize: size });
+  }
+
+  /** 设置任意预览源，包括 OfficeCLI 嵌入预览和不支持类型提示。 */
+  public setPreviewSource(source: FilePreviewSource): void {
+    this.selectedFile = {
+      ...source,
+      name: source.filename,
+      path: source.filePath ?? "",
+      size: source.fileSize ?? null,
+      content: source.content ?? "",
+      imageUrl: source.imageUrl ?? null,
+      previewUrl: source.previewUrl ?? null,
+    };
   }
 
   /** 展开 file-tree 的所有目录 */
@@ -228,6 +241,9 @@ export class AgentFileExplorer extends LitElement {
             .imageUrl=${this.selectedFile?.imageUrl ?? null}
             .filePath=${this.selectedFile?.path ?? ""}
             .fileSize=${this.selectedFile?.size ?? null}
+            .previewMode=${this.selectedFile?.mode ?? "content"}
+            .previewUrl=${this.selectedFile?.previewUrl ?? null}
+            .unsupportedMessage=${this.selectedFile?.unsupportedMessage ?? "此文件类型暂不支持预览。"}
             .theme=${this.theme}
             .shikiTheme=${this.shikiTheme}
             .showBreadcrumb=${this.showBreadcrumb}
