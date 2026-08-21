@@ -39,6 +39,7 @@ export interface FilePreviewSource {
   imageUrl?: string | null;
   previewUrl?: string | null;
   fileSize?: number | null;
+  previewMessage?: string;
   unsupportedMessage?: string;
 }
 
@@ -88,6 +89,10 @@ export class AgentFilePreview extends LitElement {
   @property({ attribute: false })
   previewUrl: string | null = null;
 
+  /** Message shown in the dedicated preview loading state. */
+  @property({ attribute: false })
+  previewMessage = "";
+
   /** Explanation shown for files that this host cannot preview. */
   @property({ attribute: false })
   unsupportedMessage = "此文件类型暂不支持预览。";
@@ -101,6 +106,7 @@ export class AgentFilePreview extends LitElement {
 
   private highlighter: Highlighter | null = null;
   private highlighterPromise: Promise<void> | null = null;
+  private renderFileContentScheduled = false;
   private currentTheme: "light" | "dark" = "dark";
 
   private get isMarkdown(): boolean {
@@ -125,18 +131,28 @@ export class AgentFilePreview extends LitElement {
       changedProps.has("filename") ||
       changedProps.has("shikiTheme") ||
       changedProps.has("markdownView") ||
-      changedProps.has("previewMode")
+      changedProps.has("previewMode") ||
+      changedProps.has("previewMessage")
     ) {
-      this.renderFileContent();
+      this.scheduleRenderFileContent();
     }
     if (changedProps.has("theme")) {
       this.updateTheme();
-      this.renderFileContent();
+      this.scheduleRenderFileContent();
     }
   }
 
+  private scheduleRenderFileContent(): void {
+    if (this.renderFileContentScheduled) return;
+    this.renderFileContentScheduled = true;
+    queueMicrotask(() => {
+      this.renderFileContentScheduled = false;
+      if (this.isConnected) this.renderFileContent();
+    });
+  }
+
   private renderFileContent(): void {
-    if (this.previewMode !== "content") {
+    if (this.previewMode !== "content" || this.previewMessage) {
       this.highlightedHtml = "";
       this.markdownHtml = "";
       return;
@@ -872,6 +888,43 @@ export class AgentFilePreview extends LitElement {
       color: var(--trees-fg-muted);
     }
 
+    .preview-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      height: 100%;
+      padding: 24px;
+      color: var(--trees-fg-muted);
+      text-align: center;
+    }
+
+    .preview-loading-spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--trees-border-color);
+      border-top-color: var(--trees-accent, #4a9eff);
+      border-radius: 50%;
+      animation: preview-loading-spin 0.9s linear infinite;
+    }
+
+    .preview-loading-title {
+      color: var(--trees-fg);
+      font-size: 14px;
+    }
+
+    .preview-loading-detail {
+      color: var(--trees-fg-muted);
+      font-size: 12px;
+    }
+
+    @keyframes preview-loading-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
     .context-menu {
       position: absolute;
       min-width: 140px;
@@ -908,7 +961,7 @@ export class AgentFilePreview extends LitElement {
   ];
 
   render(): unknown {
-    const isContentPreview = this.previewMode === "content";
+    const isContentPreview = this.previewMode === "content" && !this.previewMessage;
     const isSvgFile = isContentPreview && this.filename.toLowerCase().endsWith(".svg") && this.content.trim().startsWith("<svg");
     const isImage = isContentPreview && this.filename && isImageFile(this.filename) && !isSvgFile && (this.imageUrl ?? this.content.startsWith("data:"));
     const showMarkdown = isContentPreview && this.isMarkdown && this.markdownView === "rendered";
@@ -934,7 +987,15 @@ export class AgentFilePreview extends LitElement {
         @click=${this.closeContextMenu}
         @keydown=${(e: KeyboardEvent) => e.key === "Escape" && this.closeContextMenu()}
       >
-        ${this.loading
+        ${this.previewMessage
+          ? html`
+              <div class="preview-loading" role="status" aria-live="polite">
+                <div class="preview-loading-spinner" aria-hidden="true"></div>
+                <div class="preview-loading-title">${this.previewMessage}</div>
+                <div class="preview-loading-detail">OfficeCLI 正在准备文档预览，请稍候</div>
+              </div>
+            `
+          : this.loading
           ? html`<div class="loading">Loading...</div>`
           : this.previewMode === "unsupported"
             ? this.renderUnsupported()

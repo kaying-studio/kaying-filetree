@@ -32,17 +32,12 @@ export class AgentSplitPanel extends LitElement {
   @property({ type: Number })
   dividerSize = 4;
 
-  @state() private ratio: number;
+  @state() private ratio = 0.3;
   @state() private isDragging = false;
 
   private hostRef: Ref<HTMLElement> = litRef();
 
-  constructor() {
-    super();
-    this.ratio = this.initialRatio;
-  }
-
-  updated(changedProps: Map<string, unknown>): void {
+  willUpdate(changedProps: Map<string, unknown>): void {
     if (changedProps.has("initialRatio")) {
       this.ratio = this.initialRatio;
     }
