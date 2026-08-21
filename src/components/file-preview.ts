@@ -14,7 +14,9 @@ import {
   type ThemeRegistration,
 } from "shiki";
 import { marked } from "marked";
-import { getShikiLang, isImageFile, isMarkdownFile } from "../utils/file-types.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { getFileIconSvg } from "../icons/file-icons.js";
+import { getFileIconName, getShikiLang, isImageFile, isMarkdownFile } from "../utils/file-types.js";
 import { treesDefaultCSS, treesDarkTheme, treesLightTheme } from "../utils/theme.js";
 
 export interface ContextMenuAction {
@@ -25,6 +27,19 @@ export interface ContextMenuAction {
   visible?: (selection: string) => boolean;
   /** 点击后的处理 */
   handler: (selection: string, fullContent: string, filename: string) => void;
+}
+
+export type FilePreviewMode = "content" | "embedded" | "unsupported";
+
+export interface FilePreviewSource {
+  mode: FilePreviewMode;
+  filename: string;
+  filePath?: string;
+  content?: string;
+  imageUrl?: string | null;
+  previewUrl?: string | null;
+  fileSize?: number | null;
+  unsupportedMessage?: string;
 }
 
 @customElement("agent-file-preview")
@@ -65,6 +80,18 @@ export class AgentFilePreview extends LitElement {
   @property({ attribute: false })
   extraContextMenuActions: ContextMenuAction[] = [];
 
+  /** Preview mode selected by the host application. */
+  @property({ type: String })
+  previewMode: FilePreviewMode = "content";
+
+  /** URL for an embedded preview such as OfficeCLI's local watch server. */
+  @property({ attribute: false })
+  previewUrl: string | null = null;
+
+  /** Explanation shown for files that this host cannot preview. */
+  @property({ attribute: false })
+  unsupportedMessage = "此文件类型暂不支持预览。";
+
   @state() private highlightedHtml: string = "";
   @state() private markdownHtml: string = "";
   @state() private markdownView: "rendered" | "source" = "rendered";
@@ -97,7 +124,8 @@ export class AgentFilePreview extends LitElement {
       changedProps.has("content") ||
       changedProps.has("filename") ||
       changedProps.has("shikiTheme") ||
-      changedProps.has("markdownView")
+      changedProps.has("markdownView") ||
+      changedProps.has("previewMode")
     ) {
       this.renderFileContent();
     }
@@ -108,6 +136,11 @@ export class AgentFilePreview extends LitElement {
   }
 
   private renderFileContent(): void {
+    if (this.previewMode !== "content") {
+      this.highlightedHtml = "";
+      this.markdownHtml = "";
+      return;
+    }
     if (this.isMarkdown && this.markdownView === "rendered") {
       void this.renderMarkdown();
     } else {
@@ -322,6 +355,17 @@ export class AgentFilePreview extends LitElement {
     this.contextMenu = null;
   }
 
+  private openInSystemFileTool(event: Event): void {
+    event.stopPropagation();
+    this.dispatchEvent(
+      new CustomEvent("agent-file-open-system", {
+        detail: { filename: this.filename, path: this.filePath },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
   private async copyText(text: string) {
     try {
       await navigator.clipboard.writeText(text);
@@ -370,6 +414,7 @@ export class AgentFilePreview extends LitElement {
   }
 
   private renderMarkdownToggle(): unknown {
+    if (this.previewMode !== "content") return nothing;
     if (!this.isMarkdown) return nothing;
     return html`
       <div class="md-toggle" data-markdown-toggle="true">
@@ -387,6 +432,22 @@ export class AgentFilePreview extends LitElement {
             this.markdownView = "source";
           }}
         >源码</button>
+      </div>
+    `;
+  }
+
+  private renderUnsupported(): unknown {
+    const icon = getFileIconSvg(getFileIconName(this.filename));
+    return html`
+      <div class="unsupported-preview">
+        <div class="unsupported-icon" style=${`color:${icon.color}`}>
+          ${unsafeHTML(icon.svg)}
+        </div>
+        <div class="unsupported-title">${this.filename || "文件"}</div>
+        <div class="unsupported-message">${this.unsupportedMessage}</div>
+        <button class="unsupported-open" type="button" @click=${this.openInSystemFileTool}>
+          用系统文件工具打开
+        </button>
       </div>
     `;
   }
@@ -735,6 +796,65 @@ export class AgentFilePreview extends LitElement {
       border-radius: 4px;
     }
 
+    .embedded-preview {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+    }
+
+    .embedded-preview iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+    }
+
+    .unsupported-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 10px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .unsupported-icon {
+      color: var(--trees-fg-muted);
+    }
+
+    .unsupported-icon svg {
+      width: 48px;
+      height: 48px;
+    }
+
+    .unsupported-title {
+      max-width: 100%;
+      color: var(--trees-fg);
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .unsupported-message {
+      color: var(--trees-fg-muted);
+      font-size: 13px;
+    }
+
+    .unsupported-open {
+      margin-top: 4px;
+      padding: 7px 12px;
+      color: var(--trees-fg);
+      background: var(--trees-bg-muted);
+      border: 1px solid var(--trees-border-color);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .unsupported-open:hover {
+      background: var(--trees-hover-bg);
+    }
+
     .empty-state {
       display: flex;
       align-items: center;
@@ -788,9 +908,10 @@ export class AgentFilePreview extends LitElement {
   ];
 
   render(): unknown {
-    const isSvgFile = this.filename.toLowerCase().endsWith(".svg") && this.content.trim().startsWith("<svg");
-    const isImage = this.filename && isImageFile(this.filename) && !isSvgFile && (this.imageUrl ?? this.content.startsWith("data:"));
-    const showMarkdown = this.isMarkdown && this.markdownView === "rendered";
+    const isContentPreview = this.previewMode === "content";
+    const isSvgFile = isContentPreview && this.filename.toLowerCase().endsWith(".svg") && this.content.trim().startsWith("<svg");
+    const isImage = isContentPreview && this.filename && isImageFile(this.filename) && !isSvgFile && (this.imageUrl ?? this.content.startsWith("data:"));
+    const showMarkdown = isContentPreview && this.isMarkdown && this.markdownView === "rendered";
 
     return html`
       ${this.filename
@@ -815,7 +936,20 @@ export class AgentFilePreview extends LitElement {
       >
         ${this.loading
           ? html`<div class="loading">Loading...</div>`
-          : isSvgFile
+          : this.previewMode === "unsupported"
+            ? this.renderUnsupported()
+            : this.previewMode === "embedded" && this.previewUrl
+              ? html`
+                  <div class="embedded-preview">
+                    <iframe
+                      src=${this.previewUrl}
+                      title=${`${this.filename} 预览`}
+                      sandbox="allow-scripts allow-same-origin"
+                      referrerpolicy="no-referrer"
+                    ></iframe>
+                  </div>
+                `
+              : isSvgFile
             ? html`
                 <div class="image-container">
                   <img src=${`data:image/svg+xml;utf8,${encodeURIComponent(this.content)}`} alt=${this.filename} />
